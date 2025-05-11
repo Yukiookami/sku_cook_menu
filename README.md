@@ -27,6 +27,7 @@
 - axios
 - vue-router
 - pinia
+- tailwindcss
 - capacitor 用于跨平台打包
 
 ### 后端
@@ -65,6 +66,9 @@ export default defineConfig({
 plugins: [vue()],
 base: '', // Capacitor 必须将 base 设置为空字符串，确保资源路径正确
 })
+
+---
+
 ✅ 步骤四：构建项目并添加平台（iOS/Android）
 （1）构建前端项目：
 npm run build
