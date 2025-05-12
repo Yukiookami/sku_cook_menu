@@ -58,16 +58,19 @@ const themeStore = useThemeStore();
 const text = ref(textStore.text.login);
 const theme = ref(themeStore.themeContent);
 
+// 密码框图标
 const iconMap = reactive({
   username: "smile-o",
   password: "eye-o",
 });
 
+// 登录表单
 const loginForm = reactive({
   username: "",
   password: "",
 });
 
+// 记住我
 const rememberMe = reactive({
   checked: false,
 });
