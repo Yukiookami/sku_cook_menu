@@ -4,6 +4,7 @@ import themeConfig from "../config/theme";
 
 export const useThemeStore = defineStore("theme", () => {
   const theme = ref("default");
+  const themeContent = ref(themeConfig.default);
 
   /**
    * 更换主题时，重新设置全局css变量
@@ -22,11 +23,13 @@ export const useThemeStore = defineStore("theme", () => {
 
   const setTheme = (newTheme) => {
     theme.value = newTheme;
+    themeContent.value = themeConfig[newTheme] || themeConfig.default;
     applyTheme(newTheme);
   };
 
   return {
     theme,
+    themeContent,
     setTheme,
   };
 });

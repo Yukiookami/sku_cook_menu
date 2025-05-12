@@ -9,8 +9,6 @@ export const siteTextConfig = {
       register: "注册",
       forgetPassword: "忘记密码",
       rememberMe: "记住我",
-      loginButton: "登录",
-      registerButton: "注册",
     },
     // 登录页面结束
   },
