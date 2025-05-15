@@ -103,3 +103,43 @@ npx cap open android
 🔹 运行 iOS 项目（Mac）：
 npx cap open ios
 在 Xcode 中即可运行到模拟器或真机。
+
+```bash
+<VirtualHost *:80>
+    ServerName your.domain.com
+
+    # —— 1. 全局开启需要的模块指令 ——
+    ProxyPreserveHost On
+    SSLProxyEngine On
+    SSLProxyVerify none
+    SSLProxyCheckPeerCN off
+
+    # —— 2. 专门给 /api/ 用 Location 块做反代 ——
+    <Location /api/>
+        # 如果你还想前端能拿到 CORS 头：
+        Header always set Access-Control-Allow-Origin  "*"
+        Header always set Access-Control-Allow-Methods "GET,POST,OPTIONS,PUT,DELETE"
+        Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+
+        # 真正的后端 API 地址
+        ProxyPass        https://api.example.com/ retry=0 timeout=60
+        ProxyPassReverse https://api.example.com/
+    </Location>
+
+    # —— 3. 静态文件根目录 ——
+    DocumentRoot /home/youruser/apps/react-app/build
+    <Directory /home/youruser/apps/react-app/build>
+        Options +FollowSymLinks
+        AllowOverride None
+        Require all granted
+
+        # 用 rewrite 排除 /api/ 其余都回到 index.html
+        RewriteEngine On
+        RewriteCond %{REQUEST_URI} !^/api/
+        RewriteRule ^ /index.html [L]
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/react-app_error.log
+    CustomLog ${APACHE_LOG_DIR}/react-app_access.log combined
+</VirtualHost>
+```
