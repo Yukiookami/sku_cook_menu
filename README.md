@@ -150,36 +150,36 @@ npx cap open ios
 <VirtualHost *:80>
     ServerName your.domain.com
 
-    # —— 1. 全局开启需要的模块指令 ——
+    DocumentRoot /home/youruser/apps/react-app/build
+    <Directory /home/youruser/apps/react-app/build>
+        AllowOverride All
+        Require all granted
+        FallbackResource /index.html
+    </Directory>
+
+    # 保留客户端 Host 头（有些 API 要求）
     ProxyPreserveHost On
+
+    # 反向代理 /api/
+    ProxyPass        /api/  https://api.example.com/ retry=0 timeout=60
+    ProxyPassReverse /api/  https://api.example.com/
+
+    # 允许 Apache 转发到 HTTPS 时信任对方证书（如果是自签证书可能用到）
     SSLProxyEngine On
     SSLProxyVerify none
     SSLProxyCheckPeerCN off
 
-    # —— 2. 专门给 /api/ 用 Location 块做反代 ——
-    <Location /api/>
-        # 如果你还想前端能拿到 CORS 头：
-        Header always set Access-Control-Allow-Origin  "*"
-        Header always set Access-Control-Allow-Methods "GET,POST,OPTIONS,PUT,DELETE"
-        Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    # 给前端加上 CORS 头
+    Header always set Access-Control-Allow-Origin  "*"
+    Header always set Access-Control-Allow-Methods "GET,POST,OPTIONS,PUT,DELETE"
+    Header always set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
 
-        # 真正的后端 API 地址
-        ProxyPass        https://api.example.com/ retry=0 timeout=60
-        ProxyPassReverse https://api.example.com/
-    </Location>
-
-    # —— 3. 静态文件根目录 ——
-    DocumentRoot /home/youruser/apps/react-app/build
-    <Directory /home/youruser/apps/react-app/build>
-        Options +FollowSymLinks
-        AllowOverride None
-        Require all granted
-
-        # 用 rewrite 排除 /api/ 其余都回到 index.html
-        RewriteEngine On
-        RewriteCond %{REQUEST_URI} !^/api/
-        RewriteRule ^ /index.html [L]
-    </Directory>
+    # 对预检 OPTIONS 请求直接返回 200
+    <LocationMatch "^/api/.*$">
+      RewriteEngine On
+      RewriteCond %{REQUEST_METHOD} OPTIONS
+      RewriteRule ^(.*)$ $1 [R=200,L]
+    </LocationMatch>
 
     ErrorLog ${APACHE_LOG_DIR}/react-app_error.log
     CustomLog ${APACHE_LOG_DIR}/react-app_access.log combined
